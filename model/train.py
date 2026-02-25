@@ -124,4 +124,5 @@ print(classification_report(y_test, y_pred))
 with open("model.pkl", "wb") as f:
     pickle.dump(pipeline, f)
 
+
 print("Model saved successfully as model.pkl")
