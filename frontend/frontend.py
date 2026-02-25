@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 
-API_URL = "http://127.0.0.1:8000/predict" 
+API_URL = "http://13.203.201.232:8000/predict"
 
 st.title("Insurance Premium Category Predictor")
 st.markdown("Enter your details below:")
@@ -15,10 +15,12 @@ smoker = st.selectbox("Are you a smoker?", options=[True, False])
 city = st.text_input("City", value="Mumbai")
 occupation = st.selectbox(
     "Occupation",
-    ['retired', 'freelancer', 'student', 'government_job', 'business_owner', 'unemployed', 'private_job']
+    ['retired', 'freelancer', 'student', 'government_job',
+     'business_owner', 'unemployed', 'private_job']
 )
 
 if st.button("Predict Premium Category"):
+
     input_data = {
         "age": age,
         "weight": weight,
@@ -34,9 +36,21 @@ if st.button("Predict Premium Category"):
 
         if response.status_code == 200:
             result = response.json()
-            prediction = result["predicted_category"]
+            st.write("Raw API Response:", result)
+
+            # Safe extraction
+            response_data = result.get("Response", {})
+
+            prediction = response_data.get("predicted_category", "Not Found")
+            confidence = response_data.get("confidence", 0)
+            probabilities = response_data.get("class_probabilities", {})
 
             st.success(f"Predicted Insurance Premium Category: **{prediction}**")
+            st.info(f"Confidence: {confidence}")
+
+            if probabilities:
+                st.subheader("Class Probabilities")
+                st.json(probabilities)
 
         else:
             st.error(f"API Error: {response.status_code}")
