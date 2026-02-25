@@ -1,12 +1,19 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field, computed_field
+from pydantic import BaseModel, Field, computed_field, field_validator
 from typing import Literal, Annotated
 import pickle
+import os
 import pandas as pd
 
 #import ml model
-with open("model.pkl", "rb") as f:
+import os
+import pickle
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+model_path = os.path.join(BASE_DIR, "model", "model.pkl")
+
+with open(model_path, "rb") as f:
     model = pickle.load(f)
 
 app = FastAPI()
@@ -30,6 +37,12 @@ class UserInput(BaseModel):
     occupation : Annotated[Literal["retired", "freelancer", "student", "government_job", "business_owner", "unemployed", "private_job"], Field(...,  description="work field of the user")]
     smoker : Annotated[bool, Field(..., description="is user smoker")]
     city : Annotated[str, Field(..., description="city name of the user")]
+
+    @field_validator("city")
+    @classmethod
+    def normalize_city(cls, v: str) -> str:
+        v = v.strip().title()
+        return v
 
     @computed_field
     @property
