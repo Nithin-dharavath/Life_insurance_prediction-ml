@@ -1,7 +1,6 @@
 import os
 import pickle
 import pandas as pd
-from schema.user_input import UserInput
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -19,11 +18,11 @@ def predict_output(user_input : dict):
     predicted_class = model.predict(df)[0]
 
     probabilities = model.predict_proba(df)[0]
-    confience = max(probabilities)
+    confidence = max(probabilities)
     class_probas = dict(zip(class_labels, map(lambda p: round(p,4), probabilities)))
 
     return {
         "predicted_category" : predicted_class,
-        "confiendence" : round(confience, 4),
+        "confidence" : round(confidence, 4),
         "class_probabilities" : class_probas
     }
