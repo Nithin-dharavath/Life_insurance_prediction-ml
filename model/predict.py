@@ -20,6 +20,15 @@ else:
 
 class_labels = model.classes_.tolist()
 
+EXPECTED_LABELS = ["High", "Low", "Medium"]
+_sorted_learned = sorted(class_labels)
+_sorted_expected = sorted(EXPECTED_LABELS)
+if _sorted_learned != _sorted_expected:
+    raise RuntimeError(
+        f"Model labels {_sorted_learned} do not match expected labels {_sorted_expected}. "
+        "Retrain the model or update EXPECTED_LABELS."
+    )
+
 def predict_output(user_input : dict):
     df = pd.DataFrame([user_input])
     predicted_class = model.predict(df)[0]

@@ -13,15 +13,29 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
-from sklearn.metrics import classification_report, accuracy_score
+from sklearn.metrics import classification_report, accuracy_score, confusion_matrix
 
 from features import compute_bmi, compute_age_group, compute_lifestyle_risk, compute_city_tier
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+REPO_DIR = os.path.abspath(os.path.join(BASE_DIR, ".."))
+
+EXPECTED_LABELS = ["High", "Low", "Medium"]
+MIN_ACCURACY = 0.5
 
 
 # -----------------------------
 # 1. Load Dataset
 # -----------------------------
-df = pd.read_csv("https://raw.githubusercontent.com/campusx-official/fastapi-demo-api/refs/heads/main/insurance.csv")
+_local_path = os.path.join(REPO_DIR, "data", "insurance.csv")
+_remote_url = "https://raw.githubusercontent.com/campusx-official/fastapi-demo-api/refs/heads/main/insurance.csv"
+
+if os.path.exists(_local_path):
+    print(f"Loading dataset from {_local_path}")
+    df = pd.read_csv(_local_path)
+else:
+    print(f"Local dataset not found at {_local_path}, falling back to remote URL")
+    df = pd.read_csv(_remote_url)
 
 # -----------------------------
 # 2. Feature Engineering
@@ -82,14 +96,51 @@ pipeline.fit(X_train, y_train)
 # -----------------------------
 y_pred = pipeline.predict(X_test)
 
-print("Accuracy:", accuracy_score(y_test, y_pred))
+accuracy = accuracy_score(y_test, y_pred)
+cr = classification_report(y_test, y_pred, output_dict=True)
+cm = confusion_matrix(y_test, y_pred).tolist()
+
+print("Accuracy:", accuracy)
 print(classification_report(y_test, y_pred))
 
 
 # -----------------------------
-# 9. Save Model
+# 9. Post-Training Validation
 # -----------------------------
-with open("model.pkl", "wb") as f:
+def _validate_model(pipeline, accuracy, y_pred_labels):
+    errors = []
+
+    learned_labels = sorted(pipeline.classes_.tolist())
+    expected_sorted = sorted(EXPECTED_LABELS)
+    if learned_labels != expected_sorted:
+        errors.append(
+            f"Label mismatch: model learned {learned_labels}, expected {expected_sorted}"
+        )
+
+    if accuracy < MIN_ACCURACY:
+        errors.append(
+            f"Accuracy {accuracy:.4f} below minimum threshold {MIN_ACCURACY}"
+        )
+
+    unique_preds = set(y_pred_labels)
+    missing = [l for l in EXPECTED_LABELS if l not in unique_preds]
+    if missing:
+        errors.append(f"Predictions missing expected classes: {missing}")
+
+    if errors:
+        raise RuntimeError("Model validation failed:\n" + "\n".join(errors))
+    else:
+        print("All post-training validation checks passed.")
+
+
+_validate_model(pipeline, accuracy, y_pred)
+
+
+# -----------------------------
+# 10. Save Model
+# -----------------------------
+model_path = os.path.join(BASE_DIR, "model.pkl")
+with open(model_path, "wb") as f:
     pickle.dump(pipeline, f)
 
 metadata = {
@@ -97,9 +148,14 @@ metadata = {
     "trained_at": datetime.now(timezone.utc).isoformat(),
     "features": ["income_lpa", "occupation", "bmi", "age_group", "lifestyle_risk", "city_tier"],
     "algorithm": "RandomForestClassifier",
+    "accuracy": round(accuracy, 4),
+    "classification_report": cr,
+    "confusion_matrix": cm,
+    "test_size": 0.2,
+    "random_state": 42,
 }
 
-metadata_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "model_metadata.json")
+metadata_path = os.path.join(BASE_DIR, "model_metadata.json")
 with open(metadata_path, "w") as f:
     json.dump(metadata, f, indent=2)
 
