@@ -1,3 +1,4 @@
+import json
 import os
 import pickle
 import pandas as pd
@@ -9,7 +10,13 @@ model_path = os.path.join(BASE_DIR, "model.pkl")
 with open(model_path, "rb") as f:
     model = pickle.load(f)
 
-Model_version = "1.0.0"
+_metadata_path = os.path.join(BASE_DIR, "model_metadata.json")
+if os.path.exists(_metadata_path):
+    with open(_metadata_path) as _f:
+        _metadata = json.load(_f)
+    Model_version = _metadata.get("model_version", "unknown")
+else:
+    Model_version = "unknown"
 
 class_labels = model.classes_.tolist()
 

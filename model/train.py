@@ -1,3 +1,10 @@
+import json
+import os
+import sys
+from datetime import datetime, timezone
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+
 import pandas as pd
 import pickle
 
@@ -8,6 +15,8 @@ from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.metrics import classification_report, accuracy_score
 
+from features import compute_bmi, compute_age_group, compute_lifestyle_risk, compute_city_tier
+
 
 # -----------------------------
 # 1. Load Dataset
@@ -17,51 +26,11 @@ df = pd.read_csv("https://raw.githubusercontent.com/campusx-official/fastapi-dem
 # -----------------------------
 # 2. Feature Engineering
 # -----------------------------
-df["bmi"] = df["weight"] / (df["height"] ** 2)
+df["bmi"] = df.apply(lambda row: compute_bmi(row["weight"], row["height"]), axis=1)
+df["age_group"] = df["age"].apply(compute_age_group)
+df["lifestyle_risk"] = df.apply(lambda row: compute_lifestyle_risk(row["smoker"], row["bmi"]), axis=1)
+df["city_tier"] = df["city"].apply(compute_city_tier)
 
-def age_group(age):
-    if age < 18:
-        return "young"
-    elif age < 45:
-        return "adult"
-    elif age < 65:
-        return "middle-aged"
-    return "senior"
-
-df["age_group"] = df["age"].apply(age_group)
-
-
-def lifestyle_risk(row):
-    if row["smoker"] and row["bmi"] > 30:
-        return "high"
-    elif row["smoker"] or row["bmi"] > 27:
-        return "medium"
-    else:
-        return "low"
-    
-df["lifestyle_risk"] = df.apply(lifestyle_risk, axis=1)
-
-
-tier_1_cities = ["Mumbai", "Delhi", "Bangalore", "Chennai", "Kolkata", "Hyderabad", "Pune"]
-tier_2_cities = [
-    "Jaipur", "Chandigarh", "Indore", "Lucknow", "Patna", "Ranchi", "Visakhapatnam", "Coimbatore",
-    "Bhopal", "Nagpur", "Vadodara", "Surat", "Rajkot", "Jodhpur", "Raipur", "Amritsar", "Varanasi",
-    "Agra", "Dehradun", "Mysore", "Jabalpur", "Guwahati", "Thiruvananthapuram", "Ludhiana", "Nashik",
-    "Allahabad", "Udaipur", "Aurangabad", "Hubli", "Belgaum", "Salem", "Vijayawada", "Tiruchirappalli",
-    "Bhavnagar", "Gwalior", "Dhanbad", "Bareilly", "Aligarh", "Gaya", "Kozhikode", "Warangal",
-    "Kolhapur", "Bilaspur", "Jalandhar", "Noida", "Guntur", "Asansol", "Siliguri"
-]
-
-def city_tier(city):
-    if city in tier_1_cities:
-        return 1
-    elif city in tier_2_cities:
-        return 2
-    else:
-        return 3
-     
-df["city_tier"] = df["city"].apply(city_tier)
-     
 #remove the unwanted columns now
 df = df.drop(columns=['age', 'weight', 'height', 'smoker', 'city'])[['income_lpa', 'occupation', 'bmi', 'age_group', 'lifestyle_risk', 'city_tier', 'insurance_premium_category']]
 
@@ -123,5 +92,16 @@ print(classification_report(y_test, y_pred))
 with open("model.pkl", "wb") as f:
     pickle.dump(pipeline, f)
 
+metadata = {
+    "model_version": "1.1.0",
+    "trained_at": datetime.now(timezone.utc).isoformat(),
+    "features": ["income_lpa", "occupation", "bmi", "age_group", "lifestyle_risk", "city_tier"],
+    "algorithm": "RandomForestClassifier",
+}
+
+metadata_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "model_metadata.json")
+with open(metadata_path, "w") as f:
+    json.dump(metadata, f, indent=2)
 
 print("Model saved successfully as model.pkl")
+print(f"Metadata saved to {metadata_path}")

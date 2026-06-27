@@ -1,0 +1,13 @@
+{
+  "model_version": "1.1.0",
+  "trained_at": "2026-06-27T16:41:24.645944+00:00",
+  "features": [
+    "income_lpa",
+    "occupation",
+    "bmi",
+    "age_group",
+    "lifestyle_risk",
+    "city_tier"
+  ],
+  "algorithm": "RandomForestClassifier"
+}

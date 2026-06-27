@@ -1,6 +1,8 @@
 from pydantic import BaseModel, Field, computed_field, field_validator
 from typing import Literal, Annotated
-from city.city_tier import tier_1_cities, tier_2_cities
+
+from features import compute_bmi, compute_age_group, compute_lifestyle_risk, compute_city_tier
+
 
 #pydantic model to validate inncomming data
 class UserInput(BaseModel):
@@ -22,35 +24,19 @@ class UserInput(BaseModel):
     @computed_field
     @property
     def bmi(self) -> float:
-        return self.weight/(self.height**2)
-    
+        return compute_bmi(self.weight, self.height)
+
     @computed_field
     @property
     def lifestyle_risk(self) -> str:
-        if self.smoker and self.bmi > 30:
-            return "high"
-        elif self.smoker or self.bmi > 27:
-            return "medium"
-        else:
-            return "low"
-        
+        return compute_lifestyle_risk(self.smoker, self.bmi)
+
     @computed_field
     @property
-    def age_group(self) -> str :
-        if self.age < 18:
-             return "young"
-        elif self.age < 45:
-             return "adult"
-        elif self.age < 65:
-            return "middle-aged"
-        return "senior"
-    
+    def age_group(self) -> str:
+        return compute_age_group(self.age)
+
     @computed_field
     @property
     def city_tier(self) -> int:
-        if self.city in tier_1_cities:
-            return 1
-        elif self.city in tier_2_cities:
-            return 2
-        else:
-            return 3
+        return compute_city_tier(self.city)
