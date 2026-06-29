@@ -1,0 +1,66 @@
+{
+  "model_version": "1.1.0",
+  "trained_at": "2026-06-27T16:56:24.438837+00:00",
+  "features": [
+    "income_lpa",
+    "occupation",
+    "bmi",
+    "age_group",
+    "lifestyle_risk",
+    "city_tier"
+  ],
+  "algorithm": "RandomForestClassifier",
+  "accuracy": 0.7,
+  "classification_report": {
+    "High": {
+      "precision": 0.9,
+      "recall": 0.75,
+      "f1-score": 0.8181818181818182,
+      "support": 12.0
+    },
+    "Low": {
+      "precision": 0.6,
+      "recall": 1.0,
+      "f1-score": 0.75,
+      "support": 3.0
+    },
+    "Medium": {
+      "precision": 0.4,
+      "recall": 0.4,
+      "f1-score": 0.4,
+      "support": 5.0
+    },
+    "accuracy": 0.7,
+    "macro avg": {
+      "precision": 0.6333333333333333,
+      "recall": 0.7166666666666667,
+      "f1-score": 0.6560606060606061,
+      "support": 20.0
+    },
+    "weighted avg": {
+      "precision": 0.7300000000000001,
+      "recall": 0.7,
+      "f1-score": 0.7034090909090909,
+      "support": 20.0
+    }
+  },
+  "confusion_matrix": [
+    [
+      9,
+      0,
+      3
+    ],
+    [
+      0,
+      3,
+      0
+    ],
+    [
+      1,
+      2,
+      2
+    ]
+  ],
+  "test_size": 0.2,
+  "random_state": 42
+}
