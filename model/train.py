@@ -123,7 +123,7 @@ def _validate_model(pipeline, accuracy, y_pred_labels):
         )
 
     unique_preds = set(y_pred_labels)
-    missing = [l for l in EXPECTED_LABELS if l not in unique_preds]
+    missing = [label for label in EXPECTED_LABELS if label not in unique_preds]
     if missing:
         errors.append(f"Predictions missing expected classes: {missing}")
 
