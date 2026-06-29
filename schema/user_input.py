@@ -1,7 +1,10 @@
 from pydantic import BaseModel, Field, computed_field, field_validator
 from typing import Literal, Annotated
 
+from city.city_tier import tier_1_cities, tier_2_cities
 from features import compute_bmi, compute_age_group, compute_lifestyle_risk, compute_city_tier
+
+_SUPPORTED_CITIES = frozenset(tier_1_cities + tier_2_cities)
 
 
 #pydantic model to validate inncomming data
@@ -19,6 +22,11 @@ class UserInput(BaseModel):
     @classmethod
     def normalize_city(cls, v: str) -> str:
         v = v.strip().title()
+        if v not in _SUPPORTED_CITIES:
+            raise ValueError(
+                f"Unsupported city: '{v}'. Must be one of the recognized cities. "
+                f"See /city/city_tier.py for the full list."
+            )
         return v
 
     @computed_field
