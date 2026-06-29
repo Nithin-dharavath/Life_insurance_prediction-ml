@@ -1,3 +1,11 @@
+"""One-shot training script for the insurance premium prediction model.
+
+Downloads the CSV dataset, engineers features, fits a
+RandomForestClassifier pipeline with one-hot encoding, evaluates on a
+test split, runs post-training validation, and persists the model
+artifact along with training metadata.
+"""
+
 import json
 import os
 import sys
@@ -108,6 +116,21 @@ print(classification_report(y_test, y_pred))
 # 9. Post-Training Validation
 # -----------------------------
 def _validate_model(pipeline, accuracy, y_pred_labels):
+    """Run post-training checks on the fitted model.
+
+    Validates that:
+    - Learned class labels match ``EXPECTED_LABELS``.
+    - Accuracy meets ``MIN_ACCURACY`` threshold.
+    - All expected classes appear in predictions.
+
+    Args:
+        pipeline: Fitted sklearn Pipeline.
+        accuracy: Accuracy score on the test set.
+        y_pred_labels: Array of predicted labels from the test set.
+
+    Raises:
+        RuntimeError: If any validation check fails.
+    """
     errors = []
 
     learned_labels = sorted(pipeline.classes_.tolist())

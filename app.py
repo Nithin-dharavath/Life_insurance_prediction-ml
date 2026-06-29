@@ -1,3 +1,12 @@
+"""FastAPI application for insurance premium prediction.
+
+Endpoints:
+- GET  /         — health message
+- GET  /health   — model version and status
+- GET  /metrics  — operational counters
+- POST /predict  — run prediction on user input
+"""
+
 import logging
 import time
 from threading import Lock
@@ -30,6 +39,7 @@ _metrics = {
 
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
+    """Log method, path, status, and latency for every HTTP request."""
     start = time.time()
     response = await call_next(request)
     latency_ms = (time.time() - start) * 1000
@@ -42,6 +52,7 @@ async def log_requests(request: Request, call_next):
 
 @app.get("/")
 def home():
+    """Root endpoint returning a simple greeting."""
     with _metrics_lock:
         _metrics["requests_total"] += 1
     return {"message": "insurance premium"}
@@ -49,6 +60,7 @@ def home():
 
 @app.get("/health")
 def health_check():
+    """Health check with model version."""
     return {
         "status": "ok",
         "version": Model_version,
@@ -57,11 +69,18 @@ def health_check():
 
 @app.get("/metrics")
 def get_metrics():
+    """Return in-memory operational counters."""
     return _metrics
 
 
 @app.post("/predict")
 def predict_premium(data: UserInput):
+    """Predict insurance premium category from user input.
+
+    Accepts raw user data, computes derived features via Pydantic
+    ``computed_field``, runs the sklearn pipeline, and returns the
+    predicted category, confidence, and per-class probabilities.
+    """
     with _metrics_lock:
         _metrics["requests_total"] += 1
 

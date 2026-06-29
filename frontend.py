@@ -1,3 +1,10 @@
+"""Streamlit frontend for the Insurance Premium Predictor.
+
+Allows users to enter demographic and lifestyle data, sends the data to
+the FastAPI backend, and displays the prediction along with derived
+features and class probabilities.
+"""
+
 import json
 import os
 import streamlit as st

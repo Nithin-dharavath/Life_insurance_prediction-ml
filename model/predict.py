@@ -1,3 +1,5 @@
+"""Model loading, label validation, and inference for the prediction pipeline."""
+
 import json
 import os
 import pickle
@@ -29,7 +31,17 @@ if _sorted_learned != _sorted_expected:
         "Retrain the model or update EXPECTED_LABELS."
     )
 
-def predict_output(user_input : dict):
+def predict_output(user_input: dict) -> dict:
+    """Run inference on a single row of derived features.
+
+    Args:
+        user_input: Dictionary with keys matching the training feature set
+            (income_lpa, occupation, bmi, age_group, lifestyle_risk, city_tier).
+
+    Returns:
+        Dictionary with ``predicted_category``, ``confidence``, and
+        ``class_probabilities`` (per-class probability map).
+    """
     df = pd.DataFrame([user_input])
     predicted_class = model.predict(df)[0]
 
