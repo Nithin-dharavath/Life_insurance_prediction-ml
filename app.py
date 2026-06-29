@@ -78,6 +78,7 @@ def health_check():
 async def ui(request: Request):
     """Serve the glassmorphism UI."""
     return _templates.TemplateResponse(
+        request,
         "index.html",
         {"request": request, "api_url": "/predict"},
     )
