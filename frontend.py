@@ -1,14 +1,22 @@
+import json
 import os
 import streamlit as st
 import requests
 
+from features import compute_bmi, compute_age_group, compute_lifestyle_risk, compute_city_tier
+
 API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000")
 API_URL = f"{API_BASE_URL}/predict"
+
+CATEGORY_EXPLANATIONS = {
+    "Low": "You are in a **low** premium bracket. Your risk profile suggests minimal insurance cost.",
+    "Medium": "You are in a **moderate** premium bracket. Your risk profile indicates average insurance cost.",
+    "High": "You are in a **high** premium bracket. Your risk profile suggests elevated insurance cost.",
+}
 
 st.title("Insurance Premium Category Predictor")
 st.markdown("Enter your details below:")
 
-# Input fields
 age = st.number_input("Age", min_value=1, max_value=119, value=30)
 weight = st.number_input("Weight (kg)", min_value=1.0, value=65.0)
 height = st.number_input("Height (m)", min_value=0.5, max_value=2.5, value=1.7)
@@ -30,33 +38,64 @@ if st.button("Predict Premium Category"):
         "income_lpa": income_lpa,
         "smoker": smoker,
         "city": city,
-        "occupation": occupation
+        "occupation": occupation,
     }
 
-    try:
-        response = requests.post(API_URL, json=input_data)
+    bmi = compute_bmi(weight, height)
+    age_group = compute_age_group(age)
+    lifestyle_risk = compute_lifestyle_risk(smoker, bmi)
+    city_tier = compute_city_tier(city)
 
-        if response.status_code == 200:
-            result = response.json()
-            st.write("Raw API Response:", result)
+    with st.spinner("Predicting..."):
+        try:
+            response = requests.post(API_URL, json=input_data, timeout=15)
 
-            # Safe extraction
-            response_data = result.get("Response", {})
+            if response.status_code == 200:
+                try:
+                    result = response.json()
+                except json.JSONDecodeError:
+                    st.error("Received malformed response from server (invalid JSON).")
+                    st.stop()
 
-            prediction = response_data.get("predicted_category", "Not Found")
-            confidence = response_data.get("confidence", 0)
-            probabilities = response_data.get("class_probabilities", {})
+                response_data = result.get("Response")
+                if response_data is None:
+                    st.error("Unexpected response format from server.")
+                    st.stop()
 
-            st.success(f"Predicted Insurance Premium Category: **{prediction}**")
-            st.info(f"Confidence: {confidence}")
+                prediction = response_data.get("predicted_category", "Not Found")
+                confidence = response_data.get("confidence", 0)
+                probabilities = response_data.get("class_probabilities", {})
 
-            if probabilities:
-                st.subheader("Class Probabilities")
-                st.json(probabilities)
+                with st.container(border=True):
+                    st.subheader("Derived Features (used by model)")
+                    col1, col2, col3, col4 = st.columns(4)
+                    col1.metric("BMI", f"{bmi:.1f}")
+                    col2.metric("Age Group", age_group.replace("_", " ").title())
+                    col3.metric("Lifestyle Risk", lifestyle_risk.title())
+                    col4.metric("City Tier", str(city_tier))
 
-        else:
-            st.error(f"API Error: {response.status_code}")
-            st.write(response.text)
+                st.success(f"Predicted Insurance Premium Category: **{prediction}**")
+                st.info(f"Confidence: {confidence:.2%}")
 
-    except requests.exceptions.ConnectionError:
-        st.error("❌ Could not connect to the FastAPI server. Make sure it's running.")
+                explanation = CATEGORY_EXPLANATIONS.get(prediction)
+                if explanation:
+                    st.markdown(explanation)
+
+                if probabilities:
+                    st.subheader("Class Probabilities")
+                    st.json(probabilities)
+
+            else:
+                try:
+                    body = response.json()
+                    msg = body.get("error", body.get("detail", response.text))
+                except (json.JSONDecodeError, ValueError):
+                    msg = response.text or f"HTTP {response.status_code}"
+                st.error(f"Server error ({response.status_code}): {msg}")
+
+        except requests.exceptions.Timeout:
+            st.error("Request timed out. The server may be overloaded — please try again.")
+        except requests.exceptions.ConnectionError:
+            st.error("Could not connect to the API server. Make sure it is running.")
+        except requests.exceptions.RequestException as e:
+            st.error(f"Request failed: {e}")
