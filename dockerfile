@@ -1,4 +1,4 @@
-FROM python:3.11-slim-bookworm@sha256:9ac46a8dac38cb058a2fcf1fede2cd116be33366e76250e68f750557672d6df5
+FROM python:3.11-slim-bookworm@sha256:721dc13fd1be0a771e54b72097634291d628d0007dee9da777e2ce676a9c998f
 
 RUN addgroup --system app && adduser --system --ingroup app app
 
