@@ -1,0 +1,12 @@
+venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+tests/
+graphify-out/
+.git/
+.coverage
+docker-chnages.txt
+ui-chnage-plan
+FRONTEND_MIGRATION_PLAN.md
+design-effect.md

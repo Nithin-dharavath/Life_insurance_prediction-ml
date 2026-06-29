@@ -1,0 +1,60 @@
+/* Design tokens — warm graphite mix of cream + black */
+
+:root {
+  /* Background palette: warm graphite — a dark mix where cream warmth holds
+     back pure black. Used for page surface and the hero panel. */
+  --bg:           #14110F;   /* primary page surface — near-black with brown undertone */
+  --bg-card:      #1C1814;   /* card surface — one step warmer than page */
+  --bg-card-elev: #221D18;   /* slightly raised card */
+  --bg-soft:      #2A2420;   /* inputs, soft blocks */
+  --bg-tint:      #100D0B;   /* deepest tone */
+
+  /* Ink — dim, paper-on-dark */
+  --ink-1:        #F4ECDF;   /* primary text — warm cream */
+  --ink-2:        #B8AC9A;   /* secondary */
+  --ink-3:        #847868;   /* tertiary, hints */
+  --ink-mute:     #463F36;   /* dividers in dark theme */
+
+  /* Borders — subtle on dark */
+  --border:       #2E2823;
+  --border-strong:#3D352D;
+
+  /* Single accent — warm terracotta */
+  --accent:       #D26A4E;
+  --accent-soft:  #4A241B;
+  --accent-tint:  rgba(210, 106, 78, 0.18);
+
+  /* Category colors */
+  --cat-low:      #7BB592;
+  --cat-low-tint: rgba(123, 181, 146, 0.18);
+  --cat-med:      #D9B26A;
+  --cat-med-tint: rgba(217, 178, 106, 0.18);
+  --cat-high:     #D97A6A;
+  --cat-high-tint:rgba(217, 122, 106, 0.18);
+
+  /* Typography */
+  --font-display: "Cormorant Garamond", "Iowan Old Style", "Apple Garamond",
+                  Baskerville, "Times New Roman", "Droid Serif", Times,
+                  "Source Serif Pro", serif;
+  --font-body:    -apple-system, BlinkMacSystemFont, "Segoe UI", Inter,
+                  "Helvetica Neue", Arial, sans-serif;
+  --font-mono:    ui-monospace, "SF Mono", "JetBrains Mono", Menlo,
+                  Consolas, monospace;
+
+  /* Radii */
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 16px;
+
+  /* Motion */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-snap: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --dur-fast: 160ms;
+  --dur:      280ms;
+  --dur-slow: 480ms;
+
+  /* Shadows — soft in dark theme */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 8px 28px -10px rgba(0, 0, 0, 0.55),
+               0 2px 6px rgba(0, 0, 0, 0.35);
+}

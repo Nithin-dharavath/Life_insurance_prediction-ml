@@ -4,13 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-A machine learning project that predicts an **insurance premium category** for a user. It exposes a FastAPI backend that serves a pickled scikit-learn pipeline and a Streamlit frontend that calls the API. The model is a `RandomForestClassifier` wrapped in a `ColumnTransformer` + `OneHotEncoder` preprocessing pipeline.
+A machine learning project that predicts an **insurance premium category** for a user. It exposes a FastAPI backend that serves a pickled scikit-learn pipeline and a static HTML/CSS/JS frontend (served by the same FastAPI process). The model is a `RandomForestClassifier` wrapped in a `ColumnTransformer` + `OneHotEncoder` preprocessing pipeline.
 
 ## Architecture
 
 ```
-app.py                 # FastAPI app: /, /health, /predict (POST)
-frontend.py            # Streamlit UI that POSTs to the FastAPI /predict endpoint
+app.py                 # FastAPI app: /, /health, /predict (POST), /ui (static UI)
+templates/index.html   # Glassmorphism HTML page (served at /ui)
+static/                # CSS, JS, assets (served at /static/)
 model/
   train.py             # One-shot training script: downloads CSV, engineers features,
                        # fits pipeline, evaluates, pickles to model.pkl
@@ -25,12 +26,12 @@ city/
   city_tier.py         # Lists `tier_1_cities` and `tier_2_cities` (used by both
                        # schema/user_input.py and model/train.py — keep them in sync)
 dockerfile             # Container image: python:3.11-slim → uvicorn app:app on :8000
-requirements.txt       # Pinned deps (FastAPI, Streamlit, scikit-learn, pydantic, …)
+requirements.txt       # Pinned deps (FastAPI, scikit-learn, pydantic, …)
 ```
 
 ### Data flow (request lifecycle)
 
-1. Client (Streamlit UI or curl) sends `age, weight, height, income_lpa, occupation, smoker, city` to `POST /predict`.
+1. Browser (or curl) sends `age, weight, height, income_lpa, occupation, smoker, city` to `POST /predict`.
 2. `app.py` validates the payload against `UserInput` (Pydantic). The model automatically computes `bmi`, `age_group`, `lifestyle_risk`, `city_tier` and exposes them on the validated object.
 3. `app.py` extracts those derived fields into a dict and calls `predict_output(user_input)` in `model/predict.py`.
 4. `predict_output` builds a one-row DataFrame, runs `model.predict` and `model.predict_proba`, and returns `{predicted_category, confidence, class_probabilities}`.
@@ -63,8 +64,8 @@ pip install -r requirements.txt
 # Run the FastAPI backend (hot reload for development)
 uvicorn app:app --host 0.0.0.0 --port 8000 --reload
 
-# Run the Streamlit frontend (separate terminal)
-streamlit run frontend.py
+# Open the UI in your browser
+# Frontend is served at http://localhost:8000/ui
 ```
 
 ### Docker
@@ -91,7 +92,5 @@ python model/train.py
 
 ## Known gotchas
 
-- `model/predict.py` returns a key called `"confiendence"` (typo). The Streamlit frontend reads `response_data.get("confidence", 0)` with the correct spelling, so the typo is invisible to the UI but shows up in raw API responses. Fix in both places if you touch it.
-- `frontend.py` hardcodes `API_URL = "http://13.203.201.232:8000/predict"`. For local dev, change this to `http://localhost:8000/predict`.
 - `requirements.txt` is encoded in a way that renders as mojibake in some viewers but pip parses it correctly — don't re-encode it.
 - `.gitignore` excludes `__pycache__/`, `venv/`. `model/model.pkl` and `__pycache__` directories are checked in despite being generated.

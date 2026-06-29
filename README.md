@@ -1,15 +1,15 @@
 # Life Insurance Premium Predictor
 
-A machine learning service that predicts an insurance premium category (High / Medium / Low) based on user demographic and lifestyle inputs. The project uses a **FastAPI** backend serving a scikit-learn `RandomForestClassifier` pipeline, with a **Streamlit** frontend for interactive use.
+A machine learning service that predicts an insurance premium category (High / Medium / Low) based on user demographic and lifestyle inputs. The project uses a **FastAPI** backend serving a scikit-learn `RandomForestClassifier` pipeline, with a static HTML/CSS/JS frontend served by the same FastAPI process.
 
 ## Architecture
 
 ```
-┌──────────────┐     POST /predict     ┌──────────────────┐     ┌───────────────┐
-│  Streamlit   │ ──────────────────→   │   FastAPI App    │ ──→ │  sklearn      │
-│  Frontend    │ ←──────────────────   │   (app.py)       │ ←── │  Pipeline     │
-└──────────────┘     JSON response     └──────────────────┘     │  (model.pkl)  │
-                                                                 └───────────────┘
+┌──────────┐  GET /ui ─────→ ┌──────────────────┐     ┌───────────────┐
+│ Browser  │  static/*  ←──  │   FastAPI App    │ ──→ │  sklearn      │
+│ (HTML/JS)│  POST /predict  │   (app.py)       │ ←── │  Pipeline     │
+└──────────┘  ←── JSON resp  └──────────────────┘     │  (model.pkl)  │
+                                                       └───────────────┘
 ```
 
 ### Data flow
@@ -32,8 +32,9 @@ A machine learning service that predicts an insurance premium category (High / M
 
 ```
 .
-├── app.py                 # FastAPI application (endpoints, middleware)
-├── frontend.py            # Streamlit UI
+├── app.py                 # FastAPI application (endpoints, middleware, static UI routes)
+├── templates/             # Jinja2 HTML templates
+├── static/                # CSS, JS, and assets served by FastAPI
 ├── model/
 │   ├── train.py           # Training script (downloads CSV, fits pipeline)
 │   ├── predict.py         # Model loading and inference
@@ -89,15 +90,9 @@ uvicorn app:app --host 0.0.0.0 --port 8000 --reload
 
 The API is available at `http://localhost:8000`. Interactive docs at `http://localhost:8000/docs`.
 
-### Start the Streamlit frontend
+### Open the UI
 
-In a separate terminal:
-
-```bash
-streamlit run frontend.py
-```
-
-By default the frontend connects to `http://localhost:8000`. Override with the `API_BASE_URL` environment variable.
+Open `http://localhost:8000/ui` in your browser. The frontend is served directly by the FastAPI process — no separate server needed.
 
 ### Docker
 

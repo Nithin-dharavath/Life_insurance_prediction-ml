@@ -9,11 +9,14 @@ Endpoints:
 
 import logging
 import time
+from pathlib import Path
 from threading import Lock
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from schema.user_input import UserInput
 from model.predict import predict_output, Model_version
 
@@ -29,6 +32,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+BASE_DIR = Path(__file__).parent
+app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
+_templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 _metrics_lock = Lock()
 _metrics = {
@@ -65,6 +72,15 @@ def health_check():
         "status": "ok",
         "version": Model_version,
     }
+
+
+@app.get("/ui", include_in_schema=False)
+async def ui(request: Request):
+    """Serve the glassmorphism UI."""
+    return _templates.TemplateResponse(
+        "index.html",
+        {"request": request, "api_url": "/predict"},
+    )
 
 
 @app.get("/metrics")

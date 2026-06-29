@@ -1,0 +1,156 @@
+/* Page composition, typography */
+
+html, body { min-height: 100%; }
+
+body {
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--ink-1);
+  background:
+    radial-gradient(1100px 700px at 10% 0%,  rgba(210, 106, 78, 0.08), transparent 60%),
+    radial-gradient(900px 600px  at 100% 50%, rgba(244, 236, 223, 0.04), transparent 70%),
+    var(--bg);
+  min-height: 100vh;
+}
+
+.shell {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: clamp(40px, 7vw, 80px) clamp(20px, 5vw, 32px) clamp(80px, 12vw, 140px);
+}
+
+/* Brand — small, top-left */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--ink-2);
+  margin-bottom: clamp(48px, 9vw, 96px);
+}
+.brand__mark {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--accent);
+  display: inline-block;
+  box-shadow: 0 0 12px rgba(210, 106, 78, 0.4);
+}
+
+/* ───── Hero — single line, advanced feel ───── */
+
+.hero { margin-bottom: clamp(48px, 8vw, 80px); }
+
+/* The title is one row: text + icon, all baseline-aligned */
+.hero__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 18px;
+  margin: 0 0 18px;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(40px, 7vw, 64px);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--ink-1);
+}
+
+.hero__title-text {
+  /* subtle letter-spacing tightening for the advanced feel */
+  letter-spacing: -0.025em;
+  background: linear-gradient(180deg, var(--ink-1) 0%, #C9BEA8 100%);
+  -webkit-background-clip: text;
+          background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Animated icon next to title — a small radar/dial */
+.hero__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1em;
+  height: 1em;
+  font-size: clamp(28px, 4vw, 40px);
+  color: var(--accent);
+  filter: drop-shadow(0 0 12px rgba(210, 106, 78, 0.35));
+}
+
+.hero__icon svg { width: 100%; height: 100%; }
+
+/* — Animation: rings breathe, dot pulses, spokes fade in on delay — */
+.hero__icon .ring-outer {
+  transform-origin: center;
+  animation: ring-pulse 3.2s var(--ease) infinite;
+  opacity: 0.7;
+}
+.hero__icon .ring-inner {
+  transform-origin: center;
+  animation: ring-pulse 3.2s var(--ease) infinite;
+  animation-delay: 0.4s;
+  opacity: 0.9;
+}
+.hero__icon .dot {
+  transform-origin: center;
+  animation: dot-pulse 2s var(--ease) infinite;
+}
+
+.hero__icon .spoke {
+  transform-origin: center;
+  opacity: 0;
+  animation: spoke-in 3.2s var(--ease) infinite;
+}
+.hero__icon .spoke-1 { animation-delay: 0.6s; }
+.hero__icon .spoke-2 { animation-delay: 0.9s; }
+.hero__icon .spoke-3 { animation-delay: 1.2s; }
+.hero__icon .spoke-4 { animation-delay: 1.5s; }
+
+@keyframes ring-pulse {
+  0%, 100% { transform: scale(1);    opacity: 0.6; }
+  50%      { transform: scale(1.12); opacity: 1;   }
+}
+@keyframes dot-pulse {
+  0%, 100% { transform: scale(1);    opacity: 1; }
+  50%      { transform: scale(1.4);  opacity: 0.6; }
+}
+@keyframes spoke-in {
+  0%, 100% { opacity: 0; transform: scale(0.6); }
+  40%, 60% { opacity: 0.9; transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__icon .ring-outer,
+  .hero__icon .ring-inner,
+  .hero__icon .dot,
+  .hero__icon .spoke {
+    animation: none !important;
+    opacity: 0.85;
+    transform: none !important;
+  }
+}
+
+/* Quote underneath — small, italic serif */
+.hero__quote {
+  margin: 0;
+  max-width: 48ch;
+  font-family: var(--font-display);
+  font-style: sans-serif, serif;
+  font-size: clamp(14px, 1.6vw, 16px);
+  line-height: 1.55;
+  color: var(--ink-1);
+  position: relative;
+  padding-left: 14px;
+  border-left: 1px solid var(--ink-mute);
+}
+.hero__quote-mark {
+  color: var(--accent);
+  font-style: normal;
+  font-size: 1.2em;
+  line-height: 0;
+  vertical-align: -0.15em;
+  margin: 0 2px;
+}
+
+::selection { background: var(--accent); color: var(--ink-1); }

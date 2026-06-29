@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#14110F">
+    <title>Insurance, priced — premium category estimator</title>
+    <link rel="icon" type="image/svg+xml" href="/static/assets/favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&display=swap">
+    <link rel="stylesheet" href="/static/css/reset.css">
+    <link rel="stylesheet" href="/static/css/tokens.css">
+    <link rel="stylesheet" href="/static/css/base.css">
+    <link rel="stylesheet" href="/static/css/glass.css">
+    <link rel="stylesheet" href="/static/css/form.css">
+    <link rel="stylesheet" href="/static/css/results.css">
+    <link rel="stylesheet" href="/static/css/motion.css">
+    <link rel="stylesheet" href="/static/css/errors.css">
+  </head>
+  <body data-api-url="{{ api_url }}">
+    <main class="shell" id="main">
+      <header class="brand">
+        <span class="brand__mark" aria-hidden="true"></span>
+        <span>Premium Estimator</span>
+      </header>
+
+      <section class="hero" aria-labelledby="title">
+        <h1 id="title" class="hero__title">
+          <span class="hero__title-text">Insurance Predictor</span>
+          <span class="hero__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none">
+              <circle class="ring-outer" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.4"/>
+              <circle class="ring-inner" cx="12" cy="12" r="6"  stroke="currentColor" stroke-width="1.4"/>
+              <circle class="dot" cx="12" cy="12" r="1.8" fill="currentColor"/>
+              <path class="spoke spoke-1" d="M12 6 V3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+              <path class="spoke spoke-2" d="M12 21 V18" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+              <path class="spoke spoke-3" d="M6 12 H3"  stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+              <path class="spoke spoke-4" d="M21 12 H18" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+          </span>
+        </h1>
+        <p class="hero__quote">
+          <span class="hero__quote-mark" aria-hidden="true">&ldquo;</span>
+          The best predictor of insurance risk is the person who answers honestly.
+          <span class="hero__quote-mark" aria-hidden="true">&rdquo;</span>
+        </p>
+      </section>
+
+      <section class="card" aria-labelledby="form-title">
+        <div class="card__head">
+          <h2 id="form-title">Your details</h2>
+          <p>All calculations happen locally — only the numbers are sent.</p>
+        </div>
+        <div class="card__body">
+          <form id="predict-form" novalidate>
+            <div class="grid">
+              <label class="field" data-field="age">
+                <span class="field__label">Age</span>
+                <input name="age" type="number" inputmode="numeric" min="1" max="119" value="30" required>
+                <small class="field__error" role="alert"></small>
+              </label>
+              <label class="field" data-field="weight">
+                <span class="field__label">Weight (kg)</span>
+                <input name="weight" type="number" inputmode="decimal" min="1" step="0.1" value="65" required>
+                <small class="field__error" role="alert"></small>
+              </label>
+              <label class="field" data-field="height">
+                <span class="field__label">Height (m)</span>
+                <input name="height" type="number" inputmode="decimal" min="0.5" max="2.5" step="0.01" value="1.7" required>
+                <small class="field__error" role="alert"></small>
+              </label>
+              <label class="field" data-field="income_lpa">
+                <span class="field__label">Annual income (LPA)</span>
+                <input name="income_lpa" type="number" inputmode="decimal" min="0.1" step="0.1" value="10" required>
+                <small class="field__error" role="alert"></small>
+              </label>
+            </div>
+
+            <div class="field-group" style="margin-top: 18px;">
+              <fieldset class="field field--segmented" data-field="smoker">
+                <legend class="field__label" style="margin-bottom: 8px;">Do you smoke?</legend>
+                <div class="segmented" role="radiogroup" aria-label="Do you smoke?">
+                  <input type="radio" id="smoker-no" name="smoker" value="false" checked>
+                  <label for="smoker-no">No</label>
+                  <input type="radio" id="smoker-yes" name="smoker" value="true">
+                  <label for="smoker-yes">Yes</label>
+                </div>
+                <small class="field__error" role="alert"></small>
+              </fieldset>
+            </div>
+
+            <div class="grid" style="margin-top: 18px;">
+              <label class="field" data-field="city">
+                <span class="field__label">City</span>
+                <input name="city" type="text" list="cities" value="Mumbai" autocomplete="off" required>
+                <datalist id="cities"></datalist>
+                <small class="field__error" role="alert"></small>
+              </label>
+              <label class="field" data-field="occupation">
+                <span class="field__label">Occupation</span>
+                <select name="occupation" required>
+                  <option value="retired">Retired</option>
+                  <option value="freelancer">Freelancer</option>
+                  <option value="student">Student</option>
+                  <option value="government_job">Government job</option>
+                  <option value="business_owner">Business owner</option>
+                  <option value="unemployed">Unemployed</option>
+                  <option value="private_job" selected>Private job</option>
+                </select>
+                <small class="field__error" role="alert"></small>
+              </label>
+            </div>
+
+            <button type="submit" class="cta" id="cta">
+              <span class="cta__label">Get my estimate</span>
+              <span class="cta__spinner" aria-hidden="true"></span>
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <section id="results" class="card" aria-live="polite" hidden>
+        <!-- populated by render.js -->
+      </section>
+    </main>
+
+    <div id="toast-region" class="toast-region" role="status" aria-live="polite"></div>
+
+    <script src="/static/js/cities.js" defer></script>
+    <script src="/static/js/features.js" defer></script>
+    <script src="/static/js/validate.js" defer></script>
+    <script src="/static/js/api.js" defer></script>
+    <script src="/static/js/render.js" defer></script>
+    <script src="/static/js/app.js" defer></script>
+  </body>
+</html>

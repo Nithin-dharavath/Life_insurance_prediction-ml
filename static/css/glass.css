@@ -1,0 +1,32 @@
+/* Card surface — flat on dark */
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+
+.card__head {
+  padding: 28px 28px 0;
+}
+.card__head h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 26px;
+  letter-spacing: -0.015em;
+  color: var(--ink-1);
+}
+.card__head p {
+  margin: 6px 0 0;
+  color: var(--ink-3);
+  font-size: 14px;
+}
+
+.card__body {
+  padding: 24px 28px 28px;
+}
+
+.card + .card { margin-top: 24px; }
