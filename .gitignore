@@ -27,10 +27,6 @@ coverage.xml
 *.swp
 .DS_Store
 
-# Generated model artifacts
-model/model.pkl
-model/model_metadata.json
-
 # Environment files
 .env
 *.env
